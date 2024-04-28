@@ -246,7 +246,7 @@ for hash in hashes:
   while isDoneScanning(id, jason) == false:
     inc count
     echo "Scanned ", count, " times"
-    sleep(30000) # Sleep for 30 seconds and then check again
+    sleep(90000) # Sleep for a minute and a half and then check again
   
   writeFile(
     dir_to_create & "/" & versions[i] & ".json", # Filename
