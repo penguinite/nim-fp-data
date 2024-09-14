@@ -218,7 +218,7 @@ proc isDoneScanning(id: string, jason: var string): bool =
 # This next bit of code decides what the folder should be named.
 # Retrieve current UTC time and format it as # 2024-04-27-10:38:00
 # Note: This date marks the beginning of the scan, the hash files weren't downloaded yet! downloadJson() hasn't been called up to this point!
-let now = now().utc().format(initTimeFormat("yyyy-mm-dd-hh:mm:ss")) 
+let now = now().utc().format(initTimeFormat("yyyy-MM-dd-hh:mm:ss")) 
 var dir_to_create = json_dir & "json-" & now
 
 var i = 0
