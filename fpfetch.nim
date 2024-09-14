@@ -1,6 +1,6 @@
 {.define: ssl.}
 
-import std/[os, httpclient, parsecsv, strutils, streams, json, times, base64]
+import std/[os, httpclient, strutils, streams, json, times, base64, tables]
 
 
 const
@@ -13,16 +13,11 @@ if not dirExists("json"):
 
 var
   client = newHttpClient("Nim-Lang False Positive Reduction Efforts <3")
-  hashes: seq[string] = @[]
-  versions: seq[string] = @[]
+  versionData: Table[string, string]
 
-var p: CsvParser
-p.open("vt_links")
-while p.readRow():
-  let hashArray = p.row[1].split("/")
-  hashes.add(hashArray[high(hashArray)])
-  versions.add(p.row[0])
-p.close()
+for line in readFile("vt_links").splitLines:
+  let split = line.split(" ")
+  versionData[split[0]] = split[1]
 
 let stable = client.getContent("https://nim-lang.org/channels/stable").strip()
 
@@ -36,7 +31,7 @@ proc findLatestVersion(): string =
     latest_ver: (int, int, int) = (0,0,0)
     
   
-  for pre_version in versions:
+  for pre_version in versionData.keys:
     let version = pre_version[0..^5]
     var
       major, minor, patch = ""
@@ -230,14 +225,12 @@ while dirExists(dir_to_create):
 writeFile("latest",dir_to_create) # Save folder name to a file named "latest" so that people can easily see the latest data.
 createDir(dir_to_create) # Finally, create directory
 
-i = -1
 # Loop over every hash, request a re-scan, wait for the re-scan to finish
 # and then save it as a file to the "dir_to_create" location.
 # Also, the name of the file will be the version itself, just so we wont have to look at hashes.
-for hash in hashes:
-  inc(i)
+for version, hash in versionData.pairs:
   echo "Re-scanning hash: ", hash
-  echo "Which belongs to version: ", versions[i]
+  echo "Which belongs to version: ", version
   let id = rescanHash(hash)
 
   var count = 0
@@ -249,6 +242,6 @@ for hash in hashes:
     sleep(90000) # Sleep for a minute and a half and then check again
   
   writeFile(
-    dir_to_create & "/" & versions[i] & ".json", # Filename
+    dir_to_create & "/" & version & ".json", # Filename
     jason
   )
